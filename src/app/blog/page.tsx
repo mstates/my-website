@@ -1,58 +1,39 @@
 import { BlogLayout } from '@/components/blog/BlogLayout';
 import { BlogList } from '@/components/blog/BlogList';
-
-// Mock data for demonstration
-const DEMO_POSTS = [
-  {
-    slug: 'getting-started-with-nextjs',
-    title: 'Getting Started with Next.js',
-    excerpt: 'Learn how to build modern web applications with Next.js and React.',
-    date: '2025-05-20',
-    author: {
-      name: 'John Doe',
-      image: 'https://ui-avatars.com/api/?name=John+Doe&background=random',
-    },
-    tags: ['Next.js', 'React', 'Tutorial'],
-    readingTime: '5 min read',
-  },
-  {
-    slug: 'tailwind-css-tips',
-    title: 'Tailwind CSS Tips and Tricks',
-    excerpt: 'Discover advanced techniques for using Tailwind CSS in your projects.',
-    date: '2025-05-15',
-    author: {
-      name: 'Jane Smith',
-      image: 'https://ui-avatars.com/api/?name=Jane+Smith&background=random',
-    },
-    tags: ['CSS', 'Tailwind', 'Frontend'],
-    readingTime: '4 min read',
-  },
-  {
-    slug: 'typescript-best-practices',
-    title: 'TypeScript Best Practices',
-    excerpt: 'Learn the best practices for writing clean and maintainable TypeScript code.',
-    date: '2025-05-10',
-    author: {
-      name: 'Michael Brown',
-      image: 'https://ui-avatars.com/api/?name=Michael+Brown&background=random',
-    },
-    tags: ['TypeScript', 'JavaScript', 'Development'],
-    readingTime: '7 min read',
-  },
-];
+import { getAllPostMetadata } from '@/content/blog';
+import { NewsletterSignup } from '@/components/blog/NewsletterSignup';
 
 export const metadata = {
   title: 'Blog',
-  description: 'Read the latest articles about web development, design, and technology.',
+  description: 'Read the latest articles about leadership, management, and personal growth.',
 };
 
-export default function BlogPage() {
+export default async function BlogPage() {
+  const posts = await getAllPostMetadata();
+
+  // Map the post metadata to match the BlogList component's expected format
+  const formattedPosts = posts.map(post => ({
+    slug: post.slug,
+    title: post.title,
+    excerpt: post.description,
+    date: post.date,
+    author: post.author,
+    tags: post.tags,
+    readingTime: post.readingTime,
+  }));
+
   return (
     <BlogLayout 
       title="Blog"
-      description="Read the latest articles about web development, design, and technology."
+      description="Read the latest articles about leadership, management, and personal growth."
     >
-      <BlogList posts={DEMO_POSTS} />
+      <BlogList posts={formattedPosts} />
+      <div className="mt-16">
+        <NewsletterSignup 
+          title="Stay updated"
+          description="Subscribe to receive the latest articles and updates directly in your inbox."
+        />
+      </div>
     </BlogLayout>
   );
 }
