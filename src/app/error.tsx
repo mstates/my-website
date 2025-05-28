@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
 import { Container } from '@/components/ui/Container';
 import { Button } from '@/components/ui/Button';
+import { reportError } from '@/lib/error-tracking';
 
 export default function Error({
   error,
@@ -16,6 +17,14 @@ export default function Error({
   useEffect(() => {
     // Log the error to an error reporting service
     console.error(error);
+    
+    // Report error to tracking service (e.g., Sentry)
+    reportError(error, {
+      context: {
+        component: 'ErrorBoundary',
+        digest: error.digest,
+      },
+    });
   }, [error]);
 
   return (
