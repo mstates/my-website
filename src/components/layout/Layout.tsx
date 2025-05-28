@@ -11,9 +11,10 @@ export function Layout({ children, className, ...props }: LayoutProps) {
   return (
     <div className="flex min-h-screen flex-col" {...props}>
       <Header />
-      <main className={cn('flex-1', className)}>{children}</main>
+      <main id="main-content" className={cn('flex-1', className)} tabIndex={-1}>
+        {children}
+      </main>
       <Footer />
     </div>
   );
 }
-

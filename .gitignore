@@ -11,3 +11,6 @@ build
 .vercel
 .vscode
 *.log
+
+# Sentry Config File
+.env.sentry-build-plugin

@@ -1,15 +1,43 @@
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close menu when pressing Escape
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isOpen]);
+
+  // Focus trap inside menu when open
+  useEffect(() => {
+    if (isOpen) {
+      const focusableElements = menuRef.current?.querySelectorAll(
+        'a[href], button, input, textarea, select, details, [tabindex]:not([tabindex="-1"])'
+      );
+
+      if (focusableElements && focusableElements.length > 0) {
+        (focusableElements[0] as HTMLElement).focus();
+      }
+    }
+  }, [isOpen]);
 
   return (
     <div className="block md:hidden">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center px-3 py-2 text-muted-foreground"
+        className="text-muted-foreground flex items-center px-3 py-2"
         aria-label="Toggle Menu"
+        aria-expanded={isOpen}
+        aria-controls="mobile-menu"
       >
         <svg
           className="h-6 w-6 fill-current"
@@ -33,31 +61,38 @@ export function Navigation() {
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 right-0 mt-2 flex flex-col items-start bg-background p-4 pb-4 shadow-lg">
+        <div
+          id="mobile-menu"
+          ref={menuRef}
+          className="bg-background absolute right-0 left-0 mt-2 flex flex-col items-start p-4 pb-4 shadow-lg"
+          role="menu"
+          aria-orientation="vertical"
+          aria-labelledby="mobile-menu-button"
+        >
           <Link
             href="/"
-            className="mt-2 block px-2 py-1 text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground mt-2 block px-2 py-1"
             onClick={() => setIsOpen(false)}
           >
             Home
           </Link>
           <Link
             href="/about"
-            className="mt-2 block px-2 py-1 text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground mt-2 block px-2 py-1"
             onClick={() => setIsOpen(false)}
           >
             About
           </Link>
           <Link
             href="/blog"
-            className="mt-2 block px-2 py-1 text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground mt-2 block px-2 py-1"
             onClick={() => setIsOpen(false)}
           >
             Blog
           </Link>
           <Link
             href="/contact"
-            className="mt-2 block px-2 py-1 text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground mt-2 block px-2 py-1"
             onClick={() => setIsOpen(false)}
           >
             Contact
@@ -67,4 +102,3 @@ export function Navigation() {
     </div>
   );
 }
-
