@@ -1,4 +1,5 @@
-name: Deploy to Vercel
+name: CI/CD Pipeline
+
 on:
   push:
     branches: [main]
@@ -6,11 +7,11 @@ on:
     branches: [main]
 
 env:
-  VERCEL_ORG_ID: {{VERCEL_ORG_ID}}
-  VERCEL_PROJECT_ID: {{VERCEL_PROJECT_ID}}
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
 jobs:
-  Deploy:
+  Validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,11 +25,39 @@ jobs:
       - name: Install dependencies
         run: npm ci
         
-      - name: Run type check
+      - name: Check types
         run: npm run build
+        
+      - name: Run linting
+        run: npm run lint
+
+  Deploy:
+    needs: Validate
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
         
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
+
+      - name: Verify Vercel Credentials
+        run: |
+          if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
+            echo "Error: Missing required Vercel credentials"
+            exit 1
+          fi
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
@@ -37,4 +66,23 @@ jobs:
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
         
       - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "Deployed to $DEPLOYMENT_URL"
+          
+      - name: Comment PR with Preview URL
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const previewUrl = process.env.DEPLOYMENT_URL
+            if (previewUrl) {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `✨ Preview deployment is ready! 
+
+[Visit Preview](${previewUrl})`
+              })
+            }
