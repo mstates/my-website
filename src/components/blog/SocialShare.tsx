@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { 
   FacebookShareButton, FacebookIcon,
   TwitterShareButton, TwitterIcon,
@@ -23,13 +24,21 @@ export function SocialShare({
   tags = [], 
   className = '' 
 }: SocialShareProps) {
-  // Set a default URL if not provided
-  const shareUrl = url || (typeof window !== 'undefined' ? window.location.href : '');
+  // Initialize with the provided URL or an empty string for SSR safety
+  const [shareUrl, setShareUrl] = useState(url || '');
   const hashtags = tags.map(tag => tag.replace(/\s+/g, ''));
+  
+  // Update shareUrl on the client side if needed
+  useEffect(() => {
+    // If no URL was provided, use the current page URL (client-side only)
+    if (!url && typeof window !== 'undefined') {
+      setShareUrl(window.location.href);
+    }
+  }, [url]);
   
   return (
     <div className={`flex flex-wrap gap-2 ${className}`}>
-      <FacebookShareButton url={shareUrl} quote={title}>
+      <FacebookShareButton url={shareUrl} hashtag={hashtags.length > 0 ? `#${hashtags[0]}` : undefined}>
         <FacebookIcon size={32} round />
         <span className="sr-only">Share on Facebook</span>
       </FacebookShareButton>

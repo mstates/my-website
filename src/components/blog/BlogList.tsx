@@ -1,10 +1,9 @@
-'use client';
+// Removed 'use client' directive as this is now used by a client wrapper
 
 import { useState } from 'react';
 import { BlogCard } from './BlogCard';
 import { BlogSearch } from './BlogSearch';
 import { BlogTags } from './BlogTags';
-import { useAnalytics } from '@/lib/analytics';
 
 type Post = {
   slug: string;
@@ -26,7 +25,6 @@ interface BlogListProps {
 export function BlogList({ posts }: BlogListProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const analytics = useAnalytics();
 
   // Get all unique tags from posts
   const allTags = Array.from(
@@ -44,17 +42,11 @@ export function BlogList({ posts }: BlogListProps) {
   // Handle search input change
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    if (query.length > 2) {
-      analytics.trackEvent('blog_search', { query });
-    }
   };
 
   // Handle tag selection
   const handleTagSelect = (tag: string | null) => {
     setSelectedTag(tag);
-    if (tag) {
-      analytics.trackEvent('blog_filter_by_tag', { tag });
-    }
   };
 
   return (

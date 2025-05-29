@@ -1,6 +1,19 @@
 /** @type {import('next').NextConfig} */
 
+import { withMDX, mdxConfig } from './mdx.config.mjs';
+
+// Simplify Next.js configuration for a more stable build
 const nextConfig = {
+  // Include MDX configuration
+  ...mdxConfig,
+  
+  // Use standalone output for better production deployment
+  output: 'standalone',
+  
+  // Enable React strict mode for better development experience
+  reactStrictMode: true,
+  
+  // Configure image domains
   images: {
     domains: [
       'ui-avatars.com',
@@ -8,37 +21,7 @@ const nextConfig = {
       'avatars.githubusercontent.com',
     ],
   },
-  async headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: [
-          {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on'
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block'
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff'
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin'
-          }
-        ]
-      }
-    ];
-  },
-  async rewrites() {
-    return [
-      {
-        source: '/sitemap.xml',
-        destination: '/api/sitemap'
-      }
-    ];
-  }
 };
+
+// Apply MDX configuration
+export default withMDX(nextConfig);

@@ -3,7 +3,6 @@ import { format } from 'date-fns';
 import { Layout } from '@/components/layout/Layout';
 import { Container } from '@/components/ui/Container';
 import { SocialShare } from './SocialShare';
-import { Comments } from './Comments';
 import { NewsletterSignup } from './NewsletterSignup';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 
@@ -121,8 +120,6 @@ export function BlogPostLayout({
             </div>
             
             <NewsletterSignup className="mt-12" />
-            
-            <Comments className="mt-12" />
           </footer>
         </article>
       </Container>

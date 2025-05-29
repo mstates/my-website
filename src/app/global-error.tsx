@@ -1,6 +1,6 @@
 'use client';
 
-import * as Sentry from '@sentry/nextjs';
+import { reportError } from '@/lib/error-tracking';
 import NextError from 'next/error';
 import { useEffect } from 'react';
 
@@ -10,7 +10,8 @@ export default function GlobalError({
   error: Error & { digest?: string };
 }) {
   useEffect(() => {
-    Sentry.captureException(error);
+    // Use our simplified error tracking instead of Sentry
+    reportError(error);
   }, [error]);
 
   return (

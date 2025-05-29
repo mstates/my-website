@@ -1,9 +1,12 @@
+/**
+ * Blog post page - Displays a single blog post with MDX content
+ */
 import { Metadata } from 'next';
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import { compileMDX } from 'next-mdx-remote/rsc';
-import { MDXRemote } from 'next-mdx-remote';
+// import { MDXRemote } from 'next-mdx-remote'; // Unused import
 import readingTime from 'reading-time';
 import { notFound } from 'next/navigation';
 import { mdxComponents } from '@/components/blog/MDXComponents';
@@ -24,12 +27,18 @@ interface Post {
   readingTime: string;
 }
 
-// Generate metadata for the page
+// Define page props interface for better type safety
+interface Props {
+  params: { slug: string };
+  searchParams?: { [key: string]: string | string[] | undefined };
+}
+
+// Force dynamic rendering to avoid SSR issues with client components
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata({ 
   params 
-}: { 
-  params: { slug: string } 
-}): Promise<Metadata> {
+}: Props): Promise<Metadata> {
   const post = await getPostBySlug(params.slug);
   
   if (!post) {
@@ -59,13 +68,7 @@ export async function generateMetadata({
   };
 }
 
-// Generate static params for all posts
-export async function generateStaticParams() {
-  const posts = await getAllPosts();
-  return posts.map((post) => ({
-    slug: post.slug,
-  }));
-}
+// Remove static params generation since we're using dynamic rendering
 
 async function getPostBySlug(slug: string): Promise<Post | null> {
   const postsDirectory = path.join(process.cwd(), 'src/content/blog');
@@ -136,37 +139,56 @@ async function getAllPosts(): Promise<Post[]> {
 }
 
 export default async function BlogPostPage({ 
-  params 
-}: { 
-  params: { slug: string } 
-}) {
+  params,
+  searchParams 
+}: Props) {
   const post = await getPostBySlug(params.slug);
   
   if (!post) {
     notFound();
   }
   
-  // Compile MDX content
-  const { content } = await compileMDX({
-    source: post.content,
-    components: mdxComponents,
-    options: {
-      parseFrontmatter: true,
-    },
-  });
-  
-  return (
-    <BlogPostLayout
-      title={post.title}
-      date={post.date}
-      author={post.author}
-      readingTime={post.readingTime}
-      tags={post.tags}
-      description={post.description}
-      slug={post.slug}
-    >
-      {content}
-    </BlogPostLayout>
-  );
+  // Compile MDX content with error handling
+  try {
+    const { content } = await compileMDX({
+      source: post.content,
+      components: mdxComponents,
+      options: {
+        parseFrontmatter: true,
+      },
+    });
+    
+    return (
+      <BlogPostLayout
+        title={post.title}
+        date={post.date}
+        author={post.author}
+        readingTime={post.readingTime}
+        tags={post.tags}
+        description={post.description}
+        slug={post.slug}
+      >
+        {content}
+      </BlogPostLayout>
+    );
+  } catch (error) {
+    console.error('Error compiling MDX:', error);
+    return (
+      <BlogPostLayout
+        title={post.title}
+        date={post.date}
+        author={post.author}
+        readingTime={post.readingTime}
+        tags={post.tags}
+        description={post.description}
+        slug={post.slug}
+      >
+        <div className="p-4 border border-red-300 bg-red-50 rounded-lg text-red-800">
+          <h2 className="text-xl font-bold mb-2">Error Loading Content</h2>
+          <p>Sorry, there was a problem loading this article. Please try again later.</p>
+        </div>
+      </BlogPostLayout>
+    );
+  }
 }
 

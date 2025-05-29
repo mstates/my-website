@@ -18,7 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await getAllPosts();
   
   const blogUrls = posts.map((post) => ({
-    url: ,
+    url: `${baseUrl}/blog/${post.slug}`,
     lastModified: new Date(post.date),
   }));
 
@@ -28,7 +28,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
     },
     {
-      url: ,
+      url: `${baseUrl}/about`,
       lastModified: new Date(),
     },
     ...blogUrls,

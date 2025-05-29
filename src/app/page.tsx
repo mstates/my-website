@@ -4,6 +4,9 @@ import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/Card";
 
+// Force dynamic rendering to avoid SSR issues with client components
+export const dynamic = 'force-dynamic';
+
 export default function Home() {
   return (
     <Layout>

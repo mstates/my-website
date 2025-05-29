@@ -1,28 +1,19 @@
-// This file configures the initialization of Sentry on the client.
-// The added config here will be used whenever a users loads a page in their browser.
-// https://docs.sentry.io/platforms/javascript/guides/nextjs/
+'use client';
 
-import * as Sentry from '@sentry/nextjs';
+/**
+ * Simplified client instrumentation file without Sentry dependencies
+ * This allows the project to build while Sentry integration is being fixed
+ * 
+ * NOTE: Sentry has been temporarily removed due to version conflicts with Next.js 15
+ * It will be properly integrated in a future update
+ */
 
-Sentry.init({
-  dsn: 'https://43bc375aaa9bfa2656b46d7dd48b0e35@o4509402627112960.ingest.us.sentry.io/4509402631438336',
+// Client-side initialization for instrumentation
+export async function register() {
+  console.info('[Client Instrumentation] Client instrumentation registered');
+}
 
-  // Add optional integrations for additional features
-  integrations: [Sentry.replayIntegration()],
+// Export a no-op function to satisfy any imports
+export const onRouterTransitionStart = () => {};
 
-  // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
-  tracesSampleRate: 1,
-
-  // Define how likely Replay events are sampled.
-  // This sets the sample rate to be 10%. You may want this to be 100% while
-  // in development and sample at a lower rate in production
-  replaysSessionSampleRate: 0.1,
-
-  // Define how likely Replay events are sampled when an error occurs.
-  replaysOnErrorSampleRate: 1.0,
-
-  // Setting this option to true will print useful information to the console while you're setting up Sentry.
-  debug: false,
-});
-
-export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
+export default register;
